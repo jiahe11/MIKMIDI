@@ -88,6 +88,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)loadSoundfontFromFileAtURL:(NSURL *)fileURL error:(NSError **)error;
 
+// MARK: 下 下 新增方法，添加presentId参数
+/// 加载sf 可预设音色ID
+- (BOOL)loadSoundfontFromFileAtURL:(NSURL *)fileURL error:(NSError **)error presentId:(UInt8)presentId;
+// MARK: 上 上 新增方法，添加presentId参数
+
 + (AudioComponentDescription)appleSynthComponentDescription;
 
 // methods for property 'componentDescription'

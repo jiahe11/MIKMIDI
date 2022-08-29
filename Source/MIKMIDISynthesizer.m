@@ -140,9 +140,17 @@
 	}
 	return [self sendBankSelectAndProgramChangeForInstrumentID:instrument.instrumentID error:error];
 }
-
+// MARK: 下 下 新增方法，添加presentId参数
+// 这里的这个方法是原方法，新增了下面的 添加 presentId 方法，并将实现代码转移到新增方法中去了，用原方法去调用新方法
+// - (BOOL)loadSoundfontFromFileAtURL:(NSURL *)fileURL error:(NSError **)error
 - (BOOL)loadSoundfontFromFileAtURL:(NSURL *)fileURL error:(NSError **)error
 {
+    return [self loadSoundfontFromFileAtURL:fileURL error:error presentId:0];
+}
+
+- (BOOL)loadSoundfontFromFileAtURL:(NSURL *)fileURL error:(NSError **)error presentId:(UInt8)presentId
+{
+// MARK: 上 上 新增方法，添加presentId参数
 	error = error ? error : &(NSError *__autoreleasing){ nil };
 	OSStatus err = noErr;
 	
