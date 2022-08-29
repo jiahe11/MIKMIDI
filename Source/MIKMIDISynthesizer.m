@@ -156,7 +156,11 @@
 		instrumentData.instrumentType = [typesByFileExtension[[fileURL pathExtension]] intValue];
 		instrumentData.bankMSB  = kAUSampler_DefaultMelodicBankMSB;
 		instrumentData.bankLSB  = kAUSampler_DefaultBankLSB;
-		instrumentData.presetID = 0;
+        // MARK: 下 下，修改过
+        // 默认为0 ，因为需要改成4
+        //        instrumentData.presetID = 0;
+        instrumentData.presetID = presentId;
+        // MARK: 上 上 修改过
 		
 		// set the kAUSamplerProperty_LoadPresetFromBank property
 		err = AudioUnitSetProperty(self.instrumentUnit,

@@ -429,6 +429,13 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
         MIDITimeStamp systemTimeStamp = MIKMIDIGetCurrentTimeStamp();
         if ((systemTimeStamp > actualToMIDITimeStamp) && ([clock musicTimeStampForMIDITimeStamp:systemTimeStamp] >= self.sequenceLength)) {
             [self stopWithDispatchToProcessingQueue:NO];
+            // MARK: - 新增 播放结束回调 下 下
+            if (self.playFinishCallBack) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.playFinishCallBack();
+                });
+            }
+            // MARK: - 播放结束回调  上 上
         }
     }
 }
@@ -442,7 +449,13 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
 
     if (event.eventType == MIKMIDIEventTypeMIDINoteMessage) {
         if (destinationEvent.representsNoteOff) {
-            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock];
+            // MARK: 下 下  ------ 上上上上上 注释调这行代码
+//            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock];
+            // MARK  ------ 下下下 注释调这行代码
+
+            // MARK  ------ 上上上上上   这里的逻辑代替上面的关音；
+            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock volume:self.volume transpose:self.transpose];
+            // MARK: 上 上  ------ 下下下   这里的逻辑代替上面的关音的功能；
         } else {
             MIKMIDINoteEvent *noteEvent = (MIKMIDINoteEvent *)event;
             command = [MIKMIDICommand noteOnCommandFromNoteEvent:noteEvent clock:clock];
@@ -461,7 +474,16 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
         command = [MIKMIDICommand commandFromChannelEvent:(MIKMIDIChannelEvent *)event clock:clock];
     }
 
-    if (command) [self scheduleCommands:@[command] withCommandScheduler:destination];
+    // MARK: 下 下   ------ 上上上上上 注释调这行代码
+//    if (command) [self scheduleCommands:@[command] withCommandScheduler:destination];
+    // MARK  ------ 下下下 注释调这行代码
+    
+    // MARK  ------ 上上上上上   这里的逻辑代替上面的逻辑实现录制的功能；
+    if (command){
+        [self scheduleCommands:@[command] withCommandScheduler:destination];
+        !_nowPlayCommandBlock ? : _nowPlayCommandBlock(@[command]);  // 回调播放的指令
+    }
+    // MARK: 上 上 ------ 下下下   这里的逻辑代替上面的逻辑实现录制的功能；
 }
 
 - (void)sendAllPendingNoteOffsWithMIDITimeStamp:(MIDITimeStamp)offTimeStamp

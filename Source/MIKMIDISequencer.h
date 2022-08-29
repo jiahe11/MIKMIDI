@@ -25,14 +25,14 @@
  *  @see clickTrackStatus
  */
 typedef NS_ENUM(NSInteger, MIKMIDISequencerClickTrackStatus) {
-	/** The click track will not be heard during playback or recording. */
-	MIKMIDISequencerClickTrackStatusDisabled,
-	/** The click track will only be heard while recording. */
-	MIKMIDISequencerClickTrackStatusEnabledInRecord,
-	/** The click track will only be heard while recording and while the playback position is still in the pre-roll. */
-	MIKMIDISequencerClickTrackStatusEnabledOnlyInPreRoll,
-	/** The click track will always be heard during playback and recording. */
-	MIKMIDISequencerClickTrackStatusAlwaysEnabled
+    /** The click track will not be heard during playback or recording. */
+    MIKMIDISequencerClickTrackStatusDisabled,
+    /** The click track will only be heard while recording. */
+    MIKMIDISequencerClickTrackStatusEnabledInRecord,
+    /** The click track will only be heard while recording and while the playback position is still in the pre-roll. */
+    MIKMIDISequencerClickTrackStatusEnabledOnlyInPreRoll,
+    /** The click track will always be heard during playback and recording. */
+    MIKMIDISequencerClickTrackStatusAlwaysEnabled
 };
 
 NS_ASSUME_NONNULL_BEGIN
@@ -41,8 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
  *  MIKMIDISequencer can be used to play and record to an MIKMIDISequence.
  *
  *  @note Recording and using the click track may not yet be fully functional, and should
- *	be considered experimental in the meantime. Please submit issues and/or pull requests
- *	when you find areas that don't work as expected.
+ *    be considered experimental in the meantime. Please submit issues and/or pull requests
+ *    when you find areas that don't work as expected.
  */
 @interface MIKMIDISequencer : NSObject
 
@@ -112,43 +112,43 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)stop;
 
 /**
- *	Sends any pending note offs for the command scheduler immeidately.
- *	This can be useful if you are changing the notes in the MIDI track and
- *	you want the old notes to immediately stop rather than play until their
- *	original end time stamp.
+ *    Sends any pending note offs for the command scheduler immeidately.
+ *    This can be useful if you are changing the notes in the MIDI track and
+ *    you want the old notes to immediately stop rather than play until their
+ *    original end time stamp.
  */
 - (void)stopAllPlayingNotesForCommandScheduler:(id<MIKMIDICommandScheduler>)scheduler;
 
 /**
- *	Allows subclasses to modify the MIDI commands that are about to be
- *	scheduled with a command scheduler.
+ *    Allows subclasses to modify the MIDI commands that are about to be
+ *    scheduled with a command scheduler.
  *
- *	@param commandsToBeScheduled An array of MIKMIDICommands that are about
- *	to be scheduled.
+ *    @param commandsToBeScheduled An array of MIKMIDICommands that are about
+ *    to be scheduled.
  *
- *	@param scheduler The command scheduler the commands will be scheduled with
- *	after they are modified.
+ *    @param scheduler The command scheduler the commands will be scheduled with
+ *    after they are modified.
  *
- *	@note You should not call this method directly. It is made public solely to
- *	give subclasses a chance to alter or override any MIDI commands parsed from the
- *	MIDI sequence before they get sent to their destination endpoint.
+ *    @note You should not call this method directly. It is made public solely to
+ *    give subclasses a chance to alter or override any MIDI commands parsed from the
+ *    MIDI sequence before they get sent to their destination endpoint.
  *
  */
 - (MIKArrayOf(MIKMIDICommand *) *)modifiedMIDICommandsFromCommandsToBeScheduled:(MIKArrayOf(MIKMIDICommand *) *)commandsToBeScheduled forCommandScheduler:(id<MIKMIDICommandScheduler>)scheduler;
 
 /**
- *	Sets the loopStartTimeStamp and loopEndTimeStamp properties.
+ *    Sets the loopStartTimeStamp and loopEndTimeStamp properties.
  *
- *	@param loopStartTimeStamp The MusicTimeStamp to begin looping at.
+ *    @param loopStartTimeStamp The MusicTimeStamp to begin looping at.
  *
- *	@param loopEndTimeStamp The MusicTimeStamp to end looping at. To have
- *	the loop end at the end of the sequence, regardless of sequence length, 
- *	pass in MIKMIDISequencerEndOfSequenceLoopEndTimeStamp.
+ *    @param loopEndTimeStamp The MusicTimeStamp to end looping at. To have
+ *    the loop end at the end of the sequence, regardless of sequence length,
+ *    pass in MIKMIDISequencerEndOfSequenceLoopEndTimeStamp.
  *
- *	@see loopStartTimeStamp
- *	@see loopEndTimeStamp
- *	@see loop
- *	@see looping
+ *    @see loopStartTimeStamp
+ *    @see loopEndTimeStamp
+ *    @see loop
+ *    @see looping
  */
 - (void)setLoopStartTimeStamp:(MusicTimeStamp)loopStartTimeStamp endTimeStamp:(MusicTimeStamp)loopEndTimeStamp;
 
@@ -210,22 +210,22 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Sets the command scheduler for a track in the sequencer's sequence.
  *  Calling this method is optional. By default, the sequencer will setup internal synthesizers
- *	so that playback "just works".
+ *    so that playback "just works".
  *
  *  @note If track is not contained by the receiver's sequence, this method does nothing.
  *
- *  @param commandScheduler	An object that conforms to MIKMIDICommandScheduler with which events
- *	in track should be scheduled during playback. MIKMIDIDestinationEndpoint and MIKMIDISynthesizer both conform to MIKMIDICommandScheduler, so they can be used here. Pass nil to remove an existing command scheduler.
- *  @param track	An MIKMIDITrack instance.
+ *  @param commandScheduler    An object that conforms to MIKMIDICommandScheduler with which events
+ *    in track should be scheduled during playback. MIKMIDIDestinationEndpoint and MIKMIDISynthesizer both conform to MIKMIDICommandScheduler, so they can be used here. Pass nil to remove an existing command scheduler.
+ *  @param track    An MIKMIDITrack instance.
  */
 - (void)setCommandScheduler:(nullable id<MIKMIDICommandScheduler>)commandScheduler forTrack:(MIKMIDITrack *)track;
 
 /**
  *  Returns the command scheduler for a track in the sequencer's sequence.
  *
- *  MIKMIDISequencer will automatically create its own default synthesizers connected 
- *	for any tracks not configured manually. This means that even if you haven't called
- *	-setCommandScheduler:forTrack:, you can use this method to retrieve
+ *  MIKMIDISequencer will automatically create its own default synthesizers connected
+ *    for any tracks not configured manually. This means that even if you haven't called
+ *    -setCommandScheduler:forTrack:, you can use this method to retrieve
  *  the default command scheduler for a given track.
  *
  *  @note If track is not contained by the receiver's sequence, this method returns nil.
@@ -236,7 +236,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @see -setCommandScheduler:forTrack:
  *  @see -builtinSynthesizerForTrack:
- *	@see createSynthsIfNeeded
+ *    @see createSynthsIfNeeded
  */
 - (nullable id<MIKMIDICommandScheduler>)commandSchedulerForTrack:(MIKMIDITrack *)track;
 
@@ -263,7 +263,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) MIKMIDISequence *sequence;
 
 /**
- *	Whether or not the sequencer is currently playing. This can be observed with KVO.
+ *    Whether or not the sequencer is currently playing. This can be observed with KVO.
  *
  *  @see recording
  */
@@ -281,8 +281,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (readonly, nonatomic, getter=isRecording) BOOL recording;
 
+
 /**
- *  The tempo the sequencer should play its sequence at. When set to 0, the sequence will be played using 
+ * @property rate
+ * @abstract The playback rate of the sequencer. For example, if rate is 2.0, the sequencer will play twice as fast as normal.
+ *  Unlike the tempo property, this does not override the tempos in the sequence's tempo track. Rather, they are adjusted by multiplying by this rate.
+ * @discussion
+ *     1.0 is normal playback rate.  Rate must be > 0.0.
+*/
+@property (nonatomic) float rate;
+
+/**
+ *  The tempo the sequencer should play its sequence at. When set to 0, the sequence will be played using
  *  the tempo events from the sequence's tempo track. Default is 0.
  */
 @property (nonatomic) Float64 tempo;
@@ -333,7 +343,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @see loop
  *  @see loopStartTimeStamp
  *  @see loopEndTimeStamp
- *	@see -setLoopStartTimeStamp:loopEndTimeStamp:
+ *    @see -setLoopStartTimeStamp:loopEndTimeStamp:
  *  @see currentTimeStamp
  */
 @property (readonly, nonatomic, getter=isLooping) BOOL looping;
@@ -341,42 +351,42 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  The loop's beginning time stamp during looped playback.
  *
- *	@see -setLoopStartTimeStamp:loopEndTimeStamp:
+ *    @see -setLoopStartTimeStamp:loopEndTimeStamp:
  */
 @property (readonly, nonatomic) MusicTimeStamp loopStartTimeStamp;
 
 /**
  *  The loop's ending time stamp during looped playback, or MIKMIDISequencerEndOfSequenceLoopEndTimeStamp.
  *
- *	@note When this is set to MIKMIDISequencerEndOfSequenceLoopEndTimeStamp
- *	the loopEndTimeStamp will be treated as if it is set to the length of the
- *	sequence. The default is MIKMIDISequencerEndOfSequenceLoopEndTimeStamp.
+ *    @note When this is set to MIKMIDISequencerEndOfSequenceLoopEndTimeStamp
+ *    the loopEndTimeStamp will be treated as if it is set to the length of the
+ *    sequence. The default is MIKMIDISequencerEndOfSequenceLoopEndTimeStamp.
  *
-  *	@see effectiveLoopEndTimeStamp
- *	@see -setLoopStartTimeStamp:loopEndTimeStamp:
+  *    @see effectiveLoopEndTimeStamp
+ *    @see -setLoopStartTimeStamp:loopEndTimeStamp:
  */
 @property (readonly, nonatomic) MusicTimeStamp loopEndTimeStamp;
 
 /**
- *	The loop's ending time stamp during looped playback.
+ *    The loop's ending time stamp during looped playback.
  *
- *	@note When loopEndTimeStamp is set to MIKMIDISequencerEndOfSequenceLoopEndTimeStamp,
- *	this will return the same length as the sequence.length. Otherwise loopEndTimeStamp
- *	will be returned.
+ *    @note When loopEndTimeStamp is set to MIKMIDISequencerEndOfSequenceLoopEndTimeStamp,
+ *    this will return the same length as the sequence.length. Otherwise loopEndTimeStamp
+ *    will be returned.
  */
 @property (readonly, nonatomic) MusicTimeStamp effectiveLoopEndTimeStamp;
 
 
 /**
- *	Whether or not the sequencer should create synthesizers and endpoints
- *	for MIDI tracks that are not assigned an endpoint.
+ *    Whether or not the sequencer should create synthesizers and endpoints
+ *    for MIDI tracks that are not assigned an endpoint.
  *
- *	When this property is YES, -commandSchedulerForTrack: will create a 
- *	synthesizer for any track that has MIDI commands scheduled for it
- *	and doesn't already have an assigned scheduler. The default for this property
- *	is YES.
+ *    When this property is YES, -commandSchedulerForTrack: will create a
+ *    synthesizer for any track that has MIDI commands scheduled for it
+ *    and doesn't already have an assigned scheduler. The default for this property
+ *    is YES.
  *
- *	@see -commandSchedulerForTrack:
+ *    @see -commandSchedulerForTrack:
  */
 @property (nonatomic, getter=shouldCreateSynthsIfNeeded) BOOL createSynthsIfNeeded;
 
@@ -416,17 +426,34 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /**
- *	The maximum amount the sequencer will look ahead to schedule MIDI events. (0.05 to 1s).
+ *    The maximum amount the sequencer will look ahead to schedule MIDI events. (0.05 to 1s).
  *
- *	The default of 0.1s should suffice for most uses. You may however, need a longer time
- *	if your sequencer needs to playback on iOS while the device is locked.
+ *    The default of 0.1s should suffice for most uses. You may however, need a longer time
+ *    if your sequencer needs to playback on iOS while the device is locked.
  */
 @property (nonatomic) NSTimeInterval maximumLookAheadInterval;
+// MARK: - 下 下 custom 新增播放完成回调函数
+@property (copy, nonatomic) void (^playFinishCallBack)(void);
+// MARK: - 上 上 custom 新增播放完成回调函数
+
+// MARK: - 下 下 custom 新增音量和速度属性
+/// 音量
+@property (assign, nonatomic) UInt8 volume;
+
+@property (assign, nonatomic) SInt8 transpose;
+// MARK: - 上 上 custom 新增音量和速度属性
+
+// MARK: - 下 下 custom 新增正在播放的执行
+@property (copy, nonatomic) void (^nowPlayCommandBlock)(MIKArrayOf(MIKMIDICommand *) *commands);
+// MARK: - 上 上 custom 新增正在播放的执行
+
+-(void)closeNoteRecord;
+
 
 #pragma mark - Deprecated
 
 /**
- *	@deprecated Use -setCommandScheduler:forTrack: instead.
+ *    @deprecated Use -setCommandScheduler:forTrack: instead.
  *
  *  Sets the destination endpoint for a track in the sequencer's sequence.
  *  Calling this method is optional. By default, the sequencer will setup internal default endpoints
@@ -440,7 +467,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setDestinationEndpoint:(MIKMIDIDestinationEndpoint *)endpoint forTrack:(MIKMIDITrack *)track __attribute((deprecated("use -setCommandScheduler:forTrack: instead")));
 
 /**
- *	@deprecated Use -commandSchedulerForTrack: instead.
+ *    @deprecated Use -commandSchedulerForTrack: instead.
  *
  *  Returns the destination endpoint for a track in the sequencer's sequence.
  *
@@ -457,7 +484,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @see -setDestinationEndpoint:forTrack:
  *  @see -builtinSynthesizerForTrack:
- *	@see createSynthsAndEndpointsIfNeeded
+ *    @see createSynthsAndEndpointsIfNeeded
  */
 - (nullable MIKMIDIDestinationEndpoint *)destinationEndpointForTrack:(MIKMIDITrack *)track __attribute((deprecated("use -setCommandScheduler:forTrack: instead")));
 
@@ -470,8 +497,8 @@ NS_ASSUME_NONNULL_BEGIN
 FOUNDATION_EXPORT NSString * const MIKMIDISequencerWillLoopNotification;
 
 /**
- *	Set loopEndTimeStamp to this to have the loop end at the end of the
- *	sequence regardless of sequence length.
+ *    Set loopEndTimeStamp to this to have the loop end at the end of the
+ *    sequence regardless of sequence length.
  */
 FOUNDATION_EXPORT const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp;
 

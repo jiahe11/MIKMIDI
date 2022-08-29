@@ -171,6 +171,13 @@
 	MIKMIDIConnectionTokenAndEventHandler *tokenHandlerPair =
 	[[MIKMIDIConnectionTokenAndEventHandler alloc] initWithConnectionToken:connectionToken eventHandler:eventHandler];
 	dispatch_async(self.handlerTokenQueue, ^{
+        //MARK:临时添加  下 下
+        // 这里要清除不然会出现每次重连都会多存储一份的问题
+        NSArray *handlerPairs = [self.handlerTokenPairsByEndpoint objectForKey:source];
+        if(handlerPairs.count > 0) {
+            [self.handlerTokenPairsByEndpoint removeObjectForKey:source];
+        }
+        //MARK:临时添加。 上 上
 		NSMutableArray *tokenPairs = [self.handlerTokenPairsByEndpoint objectForKey:source];
 		if (!tokenPairs) {
 			tokenPairs = [NSMutableArray array];
