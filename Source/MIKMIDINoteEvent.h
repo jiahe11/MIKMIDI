@@ -132,6 +132,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(nullable MIKMIDIClock *)clock;
 + (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(nullable MIKMIDIClock *)clock;
 
+// MARK: 下 下 下面新增代码
+/// 扩充的移调功能
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock volume:(UInt8)volume transpose:(SInt8)transpose;
+
++ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock  volume:(UInt8)volume transpose:(SInt8)transpose;
+// MARK: 上 上 上面新增代码
+
 @end
 
 NS_ASSUME_NONNULL_END

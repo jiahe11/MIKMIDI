@@ -210,4 +210,36 @@
 	return [noteOff copy];
 }
 
+// MARK: 下 下 下面新增代码
+/// 扩充的移调功能
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock volume:(UInt8)volume transpose:(SInt8)transpose
+{
+    MIKMutableMIDINoteOnCommand *noteOn = [[MIKMutableMIDINoteOnCommand alloc] init];
+    MIDITimeStamp timestamp = clock ? [clock midiTimeStampForMusicTimeStamp:noteEvent.timeStamp] : MIKMIDIGetCurrentTimeStamp();
+    noteOn.midiTimestamp = timestamp;
+    noteOn.channel = noteEvent.channel;
+    UInt8 note = noteEvent.note;
+    if (note + transpose > 0 && note + transpose < 128) {
+        note = noteEvent.note + transpose;
+    }
+    noteOn.note = note;
+    noteOn.velocity = volume;
+    return [noteOn copy];
+}
+
++ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock  volume:(UInt8)volume transpose:(SInt8)transpose
+{
+    MIKMutableMIDINoteOffCommand *noteOff = [[MIKMutableMIDINoteOffCommand alloc] init];
+    MIDITimeStamp timestamp = clock ? [clock midiTimeStampForMusicTimeStamp:noteEvent.endTimeStamp] : MIKMIDIGetCurrentTimeStamp();
+    noteOff.midiTimestamp = timestamp;
+    noteOff.channel = noteEvent.channel;
+    UInt8 note = noteEvent.note;
+    if (note + transpose > 0 && note + transpose < 128) {
+        note = noteEvent.note + transpose;
+    }
+    noteOff.note = note;
+    noteOff.velocity = noteEvent.releaseVelocity;
+    return [noteOff copy];
+}
+// MARK: 上 上 上面新增代码
 @end
