@@ -15,6 +15,9 @@
 #import "MIKMIDIOutputPort.h"
 #import "MIKMIDIClientSourceEndpoint.h"
 #import "MIKMIDIErrors.h"
+// MARK: 下 下 修改过了，添加一个导入
+#import "MIKMIDIEntity.h"
+// 上 上 修改过了
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIApplication.h>
@@ -172,7 +175,19 @@ static MIKMIDIDeviceManager *sharedDeviceManager;
 	for (ItemCount i=0; i<numDevices; i++) {
 		MIDIDeviceRef deviceRef = MIDIGetDevice(i);
 		MIKMIDIDevice *device = [MIKMIDIDevice MIDIObjectWithObjectRef:deviceRef];
-		if (!device || !device.isOnline) continue;
+        // MARK: 下 下 修改过了
+        // 原始 if (!device || !device.isOnline) continue;
+        // 改为下面
+        // 系统的“蓝牙”模块的 entities 为空的，
+        if (!device || !device.name || !device.isOnline || device.entities.count == 0) continue;
+        else {
+            // 系统的“网络”模块的 entities第一个元素的name是Session 1，
+            MIKMIDIEntity *entity = [device.entities firstObject];
+            if(!entity || [entity.name containsString:@"Session 1"] || [device.manufacturer containsString:@"Apple"]) {
+                continue;
+            }
+        }
+        // 上 上 修改过了
 		[devices addObject:device];
 	}
 	
@@ -229,7 +244,21 @@ static MIKMIDIDeviceManager *sharedDeviceManager;
 			if (!changedObject) break;
 			
 			if (changedObject.isOnline && ![self.internalDevices containsObject:changedObject]) {
-				[self addInternalDevicesObject:changedObject];
+                // MARK: 下 下 修改过了
+                // 因为进入后台一小段时间再打开app，这里会执行，并且添加一个系统的“蓝牙”，所以这里加个判断重新获取一下设备列表
+                // 系统的“网络”模块的 entities第一个元素的name是Session 1，
+                MIKMIDIEntity *entity = [changedObject.entities firstObject];
+                if(changedObject.entities.count == 0 || !changedObject.name || [changedObject.manufacturer containsString:@"Apple"] || (!entity || [entity.name containsString:@"Session 1"])) {
+                    // 如果长度时0，说用有可能是从后台返回添加的系统的“蓝牙”，所以这里要重置一下链接数组
+                    [self retrieveAvailableDevices];
+                } else {
+                    [self addInternalDevicesObject:changedObject];
+                }
+                /* 原代码
+                [self addInternalDevicesObject:changedObject];
+                 */
+                // 上 上 修改过了
+                
 				[nc postNotificationName:MIKMIDIDeviceWasAddedNotification object:self userInfo:@{MIKMIDIDeviceKey : changedObject}];
 			}
 			if (!changedObject.isOnline) {
@@ -342,7 +371,11 @@ static MIKMIDIDeviceManager *sharedDeviceManager;
 	switch (notification->childType) {
 		case kMIDIObjectType_Device: {
 			MIKMIDIDevice *addedDevice = [MIKMIDIDevice MIDIObjectWithObjectRef:notification->child];
-			if (addedDevice && ![self.internalDevices containsObject:addedDevice]) {
+            // 下 下 修改
+            if (addedDevice && ![self.internalDevices containsObject:addedDevice] && addedDevice.name && addedDevice.entities.count != 0 && ![addedDevice.manufacturer containsString:@"Apple"]) {
+            // 原码
+//            if (addedDevice && ![self.internalDevices containsObject:addedDevice]) {
+            // 上 上 修改
 				[self addInternalDevicesObject:addedDevice];
 				[nc postNotificationName:MIKMIDIDeviceWasAddedNotification object:self userInfo:@{MIKMIDIDeviceKey : addedDevice}];
 			}

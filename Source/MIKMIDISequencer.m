@@ -282,6 +282,38 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
     self.recording = NO;
 }
 
+// MARK: 下 下 添加代码 上上上 录音的时候，收尾一下上次播放的音乐
+-(void)closeNoteRecord{
+    if ([self.pendingRecordedNoteEvents allKeys].count == 0) {
+        return;
+    }
+    
+    MIDITimeStamp stopTimeStamp = MIKMIDIGetCurrentTimeStamp();
+    MIKMIDIClock *clock = self.clock;
+    MusicTimeStamp offTimeStamp = [clock musicTimeStampForMIDITimeStamp:stopTimeStamp];
+    
+    NSMutableSet *events = [NSMutableSet set];
+
+    NSMutableDictionary *pendingRecordedNoteEvents = self.pendingRecordedNoteEvents;
+    for (NSNumber *noteNumber in pendingRecordedNoteEvents) {
+        for (MIKMutableMIDINoteEvent *event in pendingRecordedNoteEvents[noteNumber]) {
+            event.releaseVelocity = 0;
+//            event.duration = 0;//offTimeStamp - event.timeStamp;
+            event.duration = offTimeStamp - event.timeStamp;
+            event.velocity = 0;
+            [events addObject:event];
+        }
+    }
+    self.pendingRecordedNoteEvents = [NSMutableDictionary dictionary];
+
+    if ([events count]) {
+        for (MIKMIDITrack *track in self.recordEnabledTracks) {
+            [track addEvents:[events allObjects]];
+        }
+    }
+}
+// MARK: 上 上 添加代码 下下下 录音的时候，收尾一下上次播放的音乐
+
 - (void)processSequenceStartingFromMIDITimeStamp:(MIDITimeStamp)fromMIDITimeStamp
 {
     MIDITimeStamp toMIDITimeStamp = MIKMIDIGetCurrentTimeStamp() + MIKMIDIClockMIDITimeStampsPerTimeInterval(self.maximumLookAheadInterval);
@@ -431,6 +463,13 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
         MIDITimeStamp systemTimeStamp = MIKMIDIGetCurrentTimeStamp();
         if ((systemTimeStamp > actualToMIDITimeStamp) && ([clock musicTimeStampForMIDITimeStamp:systemTimeStamp] >= self.sequenceLength)) {
             [self stopWithDispatchToProcessingQueue:NO];
+            // MARK: - 新增 播放结束回调 下 下
+            if (self.playFinishCallBack) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.playFinishCallBack();
+                });
+            }
+            // MARK: - 播放结束回调  上 上
         }
     }
 }
@@ -444,7 +483,13 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
 
     if (event.eventType == MIKMIDIEventTypeMIDINoteMessage) {
         if (destinationEvent.representsNoteOff) {
-            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock];
+            // MARK: 下 下  ------ 上上上上上 注释调这行代码
+//            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock];
+            // MARK  ------ 下下下 注释调这行代码
+
+            // MARK  ------ 上上上上上   这里的逻辑代替上面的关音；
+            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock volume:self.volume transpose:self.transpose];
+            // MARK: 上 上  ------ 下下下   这里的逻辑代替上面的关音的功能；
         } else {
             MIKMIDINoteEvent *noteEvent = (MIKMIDINoteEvent *)event;
             command = [MIKMIDICommand noteOnCommandFromNoteEvent:noteEvent clock:clock];
@@ -463,7 +508,16 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
         command = [MIKMIDICommand commandFromChannelEvent:(MIKMIDIChannelEvent *)event clock:clock];
     }
 
-    if (command) [self scheduleCommands:@[command] withCommandScheduler:destination];
+    // MARK: 下 下   ------ 上上上上上 注释调这行代码
+//    if (command) [self scheduleCommands:@[command] withCommandScheduler:destination];
+    // MARK  ------ 下下下 注释调这行代码
+    
+    // MARK  ------ 上上上上上   这里的逻辑代替上面的逻辑实现录制的功能；
+    if (command){
+        [self scheduleCommands:@[command] withCommandScheduler:destination];
+        !_nowPlayCommandBlock ? : _nowPlayCommandBlock(@[command]);  // 回调播放的指令
+    }
+    // MARK: 上 上 ------ 下下下   这里的逻辑代替上面的逻辑实现录制的功能；
 }
 
 - (void)sendAllPendingNoteOffsWithMIDITimeStamp:(MIDITimeStamp)offTimeStamp

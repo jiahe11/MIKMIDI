@@ -60,10 +60,24 @@ static NSMutableSet *registeredMIKMIDICommandSubclasses;
 		const Byte *packetData = inputPacket->data + dataOffset;
 		MIKMIDICommandType commandType = (MIKMIDICommandType)packetData[0];
 		NSInteger standardLength = MIKMIDIStandardLengthOfMessageForCommandType(commandType);
-		if (commandType == MIKMIDICommandTypeSystemExclusive) {
-			// For sysex, the packet can only contain a single MIDI message (as per documentation for MIDIPacket)
-			standardLength = inputPacket->length;
-		}
+        // 下 下 修改
+        // 原码
+//        if (commandType == MIKMIDICommandTypeSystemExclusive) {
+//            // For sysex, the packet can only contain a single MIDI message (as per documentation for MIDIPacket)
+//            standardLength = inputPacket->length;
+//        }
+        
+        // 下面是修改码
+        if (commandType == MIKMIDICommandTypeSystemExclusive || standardLength == -1) {
+            // For sysex, the packet can only contain a single MIDI message (as per documentation for MIDIPacket)
+            standardLength = inputPacket->length;
+        }
+        
+//        if (standardLength == -1) {
+//            NSLog(@"standardLength == -1, MIKMIDICommandType = %d",commandType);
+//            break;
+//        }
+        // 上 上 修改
 		if (dataOffset > (inputPacket->length - standardLength)) break;
 
 		// This is gross, but it's the only way I can find to reliably create a
@@ -401,8 +415,18 @@ BOOL MIKCreateMIDIPacketListFromCommands(MIDIPacketList **outPacketList, NSArray
 		return NO;
 	}
 
-	ByteCount listSize = MIKMIDIPacketListSizeForCommands(commands);
-
+    // MARK - 下 下 修改代码
+    //    ByteCount listSize = MIKMIDIPacketListSizeForCommands(commands);
+    //  上面是原代码
+    // 修改数据长度，适应红蓝灯校验板指令
+    ByteCount listSize = MIKMIDIPacketListSizeForCommands(commands) * 2;
+    // MARK 临界值判断
+    if (listSize > 256) {
+        listSize = 256;
+    }
+    // MARK 临界值判断
+    // 上 上 修改代码
+    
 	if (listSize == 0) {
 		return NO;
 	}
@@ -415,12 +439,36 @@ BOOL MIKCreateMIDIPacketListFromCommands(MIDIPacketList **outPacketList, NSArray
 	MIDIPacket *currentPacket = MIDIPacketListInit(packetList);
 	for (NSUInteger i=0; i<[commands count]; i++) {
 		MIKMIDICommand *command = [commands objectAtIndex:i];
-		currentPacket = MIDIPacketListAdd(packetList,
-										  listSize,
-										  currentPacket,
-										  command.midiTimestamp,
-										  [command.data length],
-										  [command.data bytes]);
+        // 下 下 修改
+        // 这是三方库原代码，
+//        currentPacket = MIDIPacketListAdd(packetList,
+//                                          listSize,
+//                                          currentPacket,
+//                                          command.midiTimestamp,
+//                                          [command.data length],
+//                                          [command.data bytes]);
+        // 上面是原代码
+         /* MARK: command.midiTimestamp 这个改为0，发送指令的时候就不会额外发送时间戳校验字节，但是对于midi音频数据还是需要添加command.midiTimestamp 数据，否则会卡，所以添加逻辑判断
+          */
+        MIDITimeStamp midiTimestamp = command.midiTimestamp;
+        if(command.data.length > 7) {
+            const uint8_t *bytes = command.data.bytes;
+            NSInteger len = strlen((const char *)bytes);
+            if(len > 0) {
+                int firstValue = bytes[0]; //状态值
+                if(firstValue == 0xF0) {
+                    midiTimestamp = 0;
+                }
+            }
+
+        }
+        currentPacket = MIDIPacketListAdd(packetList,
+         listSize,
+         currentPacket,
+         midiTimestamp,
+         [command.data length],
+         [command.data bytes]);
+        // 上 上 修改
 		if (!currentPacket && (i < [commands count] - 1)) {
 			free(packetList);
 			return NO;
