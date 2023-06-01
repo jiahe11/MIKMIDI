@@ -212,7 +212,7 @@
 
 // MARK: 下 下 下面新增代码
 /// 扩充的移调功能
-+ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock volume:(UInt8)volume transpose:(SInt8)transpose
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose
 {
     MIKMutableMIDINoteOnCommand *noteOn = [[MIKMutableMIDINoteOnCommand alloc] init];
     MIDITimeStamp timestamp = clock ? [clock midiTimeStampForMusicTimeStamp:noteEvent.timeStamp] : MIKMIDIGetCurrentTimeStamp();
@@ -223,11 +223,36 @@
         note = noteEvent.note + transpose;
     }
     noteOn.note = note;
+    noteOn.velocity = noteEvent.velocity;
+    return [noteOn copy];
+}
+
+/// 扩充的移调功能
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose velocityRate:(UInt8)rate
+{
+    MIKMutableMIDINoteOnCommand *noteOn = [[MIKMutableMIDINoteOnCommand alloc] init];
+    MIDITimeStamp timestamp = clock ? [clock midiTimeStampForMusicTimeStamp:noteEvent.timeStamp] : MIKMIDIGetCurrentTimeStamp();
+    noteOn.midiTimestamp = timestamp;
+    noteOn.channel = noteEvent.channel;
+    UInt8 note = noteEvent.note;
+    if (note + transpose > 0 && note + transpose < 128) {
+        note = noteEvent.note + transpose;
+    }
+    noteOn.note = note;
+    if (rate < 0) {
+        rate = 0;
+    }else if(rate > 20){
+        rate = 20;
+    }
+    UInt8 volume = rate / 10.0 * noteEvent.velocity;
+    if (volume >= 127) {
+        volume = 127;
+    }
     noteOn.velocity = volume;
     return [noteOn copy];
 }
 
-+ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock  volume:(UInt8)volume transpose:(SInt8)transpose
++ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose
 {
     MIKMutableMIDINoteOffCommand *noteOff = [[MIKMutableMIDINoteOffCommand alloc] init];
     MIDITimeStamp timestamp = clock ? [clock midiTimeStampForMusicTimeStamp:noteEvent.endTimeStamp] : MIKMIDIGetCurrentTimeStamp();

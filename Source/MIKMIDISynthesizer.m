@@ -162,7 +162,17 @@
 		AUSamplerInstrumentData instrumentData;
 		instrumentData.fileURL  = (__bridge CFURLRef)fileURL;
 		instrumentData.instrumentType = [typesByFileExtension[[fileURL pathExtension]] intValue];
-		instrumentData.bankMSB  = kAUSampler_DefaultMelodicBankMSB;
+        // MARK: 下 下 修改 支持鼓组音源
+        /*
+         原代码
+//		instrumentData.bankMSB  = kAUSampler_DefaultMelodicBankMSB;
+         */
+        if(self.soundFontType == -1) {
+            instrumentData.bankMSB  = kAUSampler_DefaultPercussionBankMSB;//kAUSampler_DefaultMelodicBankMSB;
+        } else {
+            instrumentData.bankMSB  = kAUSampler_DefaultMelodicBankMSB;
+        }
+        // MARK: 上 上 修改 支持鼓组音源
 		instrumentData.bankLSB  = kAUSampler_DefaultBankLSB;
         // MARK: 下 下，修改过
         // 默认为0 ，因为需要改成4

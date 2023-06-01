@@ -353,10 +353,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  The length the that the sequencer should consider its sequence to be. When set to 0, the sequencer
- *  will use sequence.length instead.
+ *  will use sequence.length instead. 【定序器应考虑其序列的长度。 设置为0时，定序器将改用sequence.length。】
  *
  *  This can be handy if you want to alter the duration of playback to be shorter or longer
- *  than the sequence's length without affecting the sequence itself.
+ *  than the sequence's length without affecting the sequence itself. 【如果要在不影响序列本身的情况下将播放时间更改为短于或长于序列的长度，这可能很方便。】
  */
 @property (nonatomic) MusicTimeStamp overriddenSequenceLength;
 
@@ -492,14 +492,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 // MARK: - 下 下 custom 新增音量和速度属性
 /// 音量
-@property (assign, nonatomic) UInt8 volume;
-
+//@property (assign, nonatomic) UInt8 velocityRate;
+/// 移调
 @property (assign, nonatomic) SInt8 transpose;
 // MARK: - 上 上 custom 新增音量和速度属性
 
 // MARK: - 下 下 custom 新增正在播放的执行
 @property (copy, nonatomic) void (^nowPlayCommandBlock)(MIKArrayOf(MIKMIDICommand *) *commands);
 // MARK: - 上 上 custom 新增正在播放的执行
+// MARK: 下 下 修改
+/// play 每个音符回调
+@property (copy, nonatomic, nullable) void (^sendingMIDIData)(NSArray <MIKMIDICommand * > *command);
+// 播放进度回调，进度为节拍数量，并不是时间，想要用时间表示，还需要自行根据速度进行转化
+@property (copy, nonatomic, nullable) void (^midiProgressBlock)(MusicTimeStamp allLength,MusicTimeStamp nowTime,float progress);
+// 音乐总节拍数量
+- (MusicTimeStamp)sequenceLength;
+// MARK: - 上 上 修改
 
 -(void)closeNoteRecord;
 

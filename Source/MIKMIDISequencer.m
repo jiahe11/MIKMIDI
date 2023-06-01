@@ -43,6 +43,10 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
 
 @interface MIKMIDIEventWithDestination : NSObject
 @property (nonatomic, strong) MIKMIDIEvent *event;
+/// 音量 比率
+@property (nonatomic) UInt8 velocityRate;
+/// 轨道编号
+@property (nonatomic) UInt8 tag;
 @property (nonatomic, strong) id<MIKMIDICommandScheduler> destination;
 @property (nonatomic, readonly) BOOL representsNoteOff;
 + (instancetype)eventWithDestination:(id<MIKMIDICommandScheduler>)destination event:(MIKMIDIEvent *)event;
@@ -385,8 +389,16 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
 
     // Never play muted tracks. If any non-muted tracks are soloed, only play those. Matches MusicPlayer behavior
     NSArray *tracksToPlay = soloTracks.count != 0 ? soloTracks : nonMutedTracks;
-
+    // MARK: 下 下 修改
+    UInt8 index = 0;
+    // 上 上 修改
     for (MIKMIDITrack *track in tracksToPlay) {
+        // MARK: 下 下 修改
+        if (!track.isShow) {
+            index++;
+            continue;
+        }
+        // 上 上 修改
         MusicTimeStamp startTimeStamp = MAX(fromMusicTimeStamp - track.offset, 0);
         MusicTimeStamp endTimeStamp = toMusicTimeStamp - track.offset;
         NSArray *events = [track eventsFromTimeStamp:startTimeStamp toTimeStamp:endTimeStamp];
@@ -406,9 +418,22 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
             if ([event isKindOfClass:[MIKMIDINoteEvent class]] && [(MIKMIDINoteEvent *)event duration] <= 0) continue;
             NSNumber *timeStampKey = @(event.timeStamp);
             NSMutableArray *eventsAtTimeStamp = allEventsByTimeStamp[timeStampKey] ? allEventsByTimeStamp[timeStampKey] : [NSMutableArray array];
+// MARK: 下 下 修改
+            // 新增轨道音量功能
+            MIKMIDIEventWithDestination *des = [MIKMIDIEventWithDestination eventWithDestination:destination event:event];
+            des.velocityRate = track.velocityRate;
+            des.tag = index;
+            [eventsAtTimeStamp addObject:des];
+            /*
+            原代码
             [eventsAtTimeStamp addObject:[MIKMIDIEventWithDestination eventWithDestination:destination event:event]];
+             */
+// 上 上 修改
             allEventsByTimeStamp[timeStampKey] = eventsAtTimeStamp;
         }
+        // MARK: 下 下 修改
+        index++;
+        // 上 上 修改
     }
 
     // Get click track events
@@ -471,6 +496,11 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
             }
             // MARK: - 播放结束回调  上 上
         }
+        // MARK: - 下 下 新增 播放 进度
+        if(self.midiProgressBlock) {
+            self.midiProgressBlock(self.sequenceLength, [clock musicTimeStampForMIDITimeStamp:systemTimeStamp], [clock musicTimeStampForMIDITimeStamp:systemTimeStamp]/self.sequenceLength);
+        }
+        // MARK: - 上 上 播放 进度
     }
 }
 
@@ -488,12 +518,16 @@ const MusicTimeStamp MIKMIDISequencerEndOfSequenceLoopEndTimeStamp = -1;
             // MARK  ------ 下下下 注释调这行代码
 
             // MARK  ------ 上上上上上   这里的逻辑代替上面的关音；
-            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock volume:self.volume transpose:self.transpose];
+            command = [MIKMIDICommand noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)event clock:clock transpose:self.transpose];
             // MARK: 上 上  ------ 下下下   这里的逻辑代替上面的关音的功能；
         } else {
             MIKMIDINoteEvent *noteEvent = (MIKMIDINoteEvent *)event;
-            command = [MIKMIDICommand noteOnCommandFromNoteEvent:noteEvent clock:clock];
-
+            // MARK: 下 下 修改
+            /* 原代码
+//            command = [MIKMIDICommand noteOnCommandFromNoteEvent:noteEvent clock:clock];
+             */
+            command = [MIKMIDICommand noteOnCommandFromNoteEvent:noteEvent clock:clock transpose:self.transpose velocityRate:destinationEvent.velocityRate];
+            // 上 上 修改
             // Add note off to pending note offs
             MusicTimeStamp endTimeStamp = noteEvent.endTimeStamp;
             NSMutableDictionary *pendingNoteOffs = self.pendingNoteOffs;

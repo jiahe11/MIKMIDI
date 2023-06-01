@@ -53,6 +53,10 @@
 		_internalEvents = [[NSMutableSet alloc] init];
         _musicTrack = musicTrack;
         _sequence = sequence;
+// MARK: 下 下 修改
+        _velocityRate = 10;
+        _isShow = YES;
+// 上 上 修改
 		[self reloadAllEventsFromMusicTrack];
     }
 

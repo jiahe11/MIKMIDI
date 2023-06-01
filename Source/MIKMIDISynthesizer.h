@@ -29,6 +29,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MIKMIDISynthesizer : NSObject <MIKMIDICommandScheduler>
 
+// MARK: 下 下 修改
+// soundFontType 音源类型，是鼓组还是普通, 小于0 为 鼓组，否者为普通音源，目前demo中设置设定，实际项目中可根据实际情况更改，调整
+@property (nonatomic,assign) int soundFontType;
+// 上 上 修改
 /**
  *  Initializes an MIKMIDISynthesizer instance which uses the default 
  *  MIDI instrument audio unit.

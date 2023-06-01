@@ -133,10 +133,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(nullable MIKMIDIClock *)clock;
 
 // MARK: 下 下 下面新增代码
-/// 扩充的移调功能
-+ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock volume:(UInt8)volume transpose:(SInt8)transpose;
-
-+ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock  volume:(UInt8)volume transpose:(SInt8)transpose;
+/// 扩充的移调功能: transpose 移调
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose;
+/// 扩充的移调功能：transpose 移调 ， rate 声音大小比率 0 - 20
++ (MIKMIDINoteOnCommand *)noteOnCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose velocityRate:(UInt8)rate;
+// 关音 ： transpose 移调
++ (MIKMIDINoteOffCommand *)noteOffCommandFromNoteEvent:(MIKMIDINoteEvent *)noteEvent clock:(MIKMIDIClock *)clock transpose:(SInt8)transpose;
 // MARK: 上 上 上面新增代码
 
 @end
